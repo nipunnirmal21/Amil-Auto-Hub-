@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import request from 'supertest';
+import Product from '../models/Product.js';
+import Inquiry from '../models/Inquiry.js';
+import mongoose from 'mongoose';
+import { createApp } from '../app.js';
+const app=createApp();
+const valid={name:'Test Customer',phone:'+94770000000',partRequired:'Fitment advice'};
+test('invalid inquiry does not get accepted',async()=>{const res=await request(app).post('/api/inquiries').send({name:'A',phone:'abc',partRequired:'x'});assert.equal(res.status,400)});
+test('disconnected database cannot produce a false success',async()=>{const res=await request(app).post('/api/inquiries').send(valid);assert.equal(res.status,503)});
+test('invalid product IDs return a controlled response',async()=>{assert.equal((await request(app).get('/api/products/not-an-id')).status,400)});
+test('disconnected catalogue reports unavailable',async()=>{assert.equal((await request(app).get('/api/products')).status,503)});
+test('disallowed origins are rejected',async()=>{assert.equal((await request(app).get('/api/products').set('Origin','https://untrusted.example')).status,403)});
+test('negative product prices fail validation',()=>{const p=new Product({name:'Validation fixture',slug:'validation-fixture',category:'Filters',price:-1});assert.ok(p.validateSync()?.errors.price)});
+test('empty catalogue and persistence success contract',async()=>{const oldState=mongoose.connection.readyState;const find=Product.find,create=Inquiry.create;try{mongoose.connection.readyState=1;Product.find=()=>({sort:()=>({limit:()=>({lean:async()=>[]})})});let stored;Inquiry.create=async data=>{stored=data;return data};const catalogue=await request(app).get('/api/products');assert.deepEqual(catalogue.body,{products:[]});const result=await request(app).post('/api/inquiries').send({...valid,admin:true});assert.equal(result.status,201);assert.equal(stored.name,valid.name);assert.equal(stored.admin,undefined)}finally{mongoose.connection.readyState=oldState;Product.find=find;Inquiry.create=create}});

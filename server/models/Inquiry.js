@@ -1,0 +1,3 @@
+import mongoose from 'mongoose';
+const inquirySchema=new mongoose.Schema({name:{type:String,required:true,trim:true,maxLength:200},phone:{type:String,required:true,trim:true,maxLength:30,match:/^[+\d() .-]{7,30}$/},email:{type:String,trim:true,maxLength:254,validate:v=>!v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},vehicleModel:{type:String,trim:true,maxLength:200},partRequired:{type:String,required:true,trim:true,maxLength:200},message:{type:String,trim:true,maxLength:3000}},{timestamps:{createdAt:true,updatedAt:false},bufferCommands:false});
+export default mongoose.model('Inquiry',inquirySchema);
