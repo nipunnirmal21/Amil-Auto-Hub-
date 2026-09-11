@@ -1,0 +1,4 @@
+import mongoose from 'mongoose';
+export const categories=['Engine Parts','Brake Components','Suspension Parts','Filters','Electrical Parts','Vehicle Accessories'];
+const productSchema=new mongoose.Schema({name:{type:String,required:true,trim:true,maxLength:200},slug:{type:String,required:true,unique:true,lowercase:true,trim:true,match:/^[a-z0-9]+(?:-[a-z0-9]+)*$/},category:{type:String,enum:categories,required:true},brand:{type:String,trim:true,maxLength:100},vehicleCompatibility:[{type:String,trim:true,maxLength:200}],description:{type:String,trim:true,maxLength:5000},images:[{type:String,validate:v=>/^https:\/\//.test(v)||/^\/(?!\/)/.test(v)}],price:{type:Number,min:0,default:null},availability:{type:String,enum:['In stock','Out of stock','On request'],default:'On request'},featured:{type:Boolean,default:false}},{timestamps:true,bufferCommands:false});
+export default mongoose.model('Product',productSchema);
