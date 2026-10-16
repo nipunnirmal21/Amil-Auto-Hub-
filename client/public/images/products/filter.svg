@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 260" role="img" aria-labelledby="title">
+  <title id="title">Automotive filter illustration</title>
+  <rect width="360" height="260" rx="24" fill="#f6f6f2"/>
+  <ellipse cx="180" cy="218" rx="92" ry="13" fill="#deded7"/>
+  <ellipse cx="180" cy="84" rx="75" ry="29" fill="#f0c900" stroke="#242527" stroke-width="5"/>
+  <path d="M105 84v111c0 17 34 30 75 30s75-13 75-30V84c0 17-34 30-75 30s-75-13-75-30z" fill="#ffd600" stroke="#242527" stroke-width="5"/>
+  <path d="M126 109v93M148 114v102M180 116v106M212 114v102M234 109v93" stroke="#bd9f00" stroke-width="5"/>
+  <ellipse cx="180" cy="84" rx="29" ry="12" fill="#fff" stroke="#242527" stroke-width="5"/>
+  <ellipse cx="180" cy="84" rx="10" ry="4" fill="#e6342b"/>
+</svg>

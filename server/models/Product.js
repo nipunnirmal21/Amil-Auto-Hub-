@@ -1,4 +1,44 @@
 import mongoose from 'mongoose';
-export const categories=['Engine Parts','Brake Components','Suspension Parts','Filters','Electrical Parts','Vehicle Accessories'];
-const productSchema=new mongoose.Schema({name:{type:String,required:true,trim:true,maxLength:200},slug:{type:String,required:true,unique:true,lowercase:true,trim:true,match:/^[a-z0-9]+(?:-[a-z0-9]+)*$/},category:{type:String,enum:categories,required:true},brand:{type:String,trim:true,maxLength:100},vehicleCompatibility:[{type:String,trim:true,maxLength:200}],description:{type:String,trim:true,maxLength:5000},images:[{type:String,validate:v=>/^https:\/\//.test(v)||/^\/(?!\/)/.test(v)}],price:{type:Number,min:0,default:null},availability:{type:String,enum:['In stock','Out of stock','On request'],default:'On request'},featured:{type:Boolean,default:false}},{timestamps:true,bufferCommands:false});
-export default mongoose.model('Product',productSchema);
+
+export const stockStatuses = ['In Stock', 'Low Stock', 'Out of Stock'];
+
+export function stockStatusFor(quantity) {
+  if (quantity === 0) return 'Out of Stock';
+  if (quantity <= 5) return 'Low Stock';
+  return 'In Stock';
+}
+
+const productSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true, maxLength: 200 },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+  },
+  brand: { type: String, trim: true, maxLength: 100, default: '' },
+  price: { type: Number, required: true, min: 0 },
+  stockQuantity: { type: Number, required: true, min: 0, default: 0 },
+  stockStatus: { type: String, enum: stockStatuses, default: 'Out of Stock' },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true },
+  subcategory: { type: mongoose.Schema.Types.ObjectId, ref: 'Subcategory', default: null, index: true },
+  shortDescription: { type: String, trim: true, maxLength: 500, default: '' },
+  description: { type: String, trim: true, maxLength: 5000, default: '' },
+  mainImage: { type: String, required: true, trim: true },
+  images: [{ type: String, trim: true }],
+  sku: { type: String, trim: true, maxLength: 100, default: '' },
+  vehicleCompatibility: { type: String, trim: true, maxLength: 2000, default: '' },
+  specifications: { type: Map, of: String, default: {} },
+  features: [{ type: String, trim: true, maxLength: 300 }],
+  warranty: { type: String, trim: true, maxLength: 1000, default: '' },
+  featured: { type: Boolean, default: false },
+  active: { type: Boolean, default: true, index: true },
+}, { timestamps: true, bufferCommands: false });
+
+productSchema.pre('validate', function setStockStatus() {
+  this.stockStatus = stockStatusFor(this.stockQuantity);
+});
+
+export default mongoose.model('Product', productSchema);

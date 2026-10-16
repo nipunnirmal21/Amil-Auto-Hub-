@@ -1,5 +1,122 @@
-import { useEffect,useState } from 'react';
-import { Cog,Disc3,MoveVertical,Filter,Zap,Wrench,ArrowUpRight,PackageOpen } from 'lucide-react';
-import { apiBase,apiEnabled } from '../data/business';
-const categories=[[Cog,'Engine Parts','The heart of every drive.'],[Disc3,'Brake Components','Confidence at every stop.'],[MoveVertical,'Suspension Parts','Keep the ride feeling right.'],[Filter,'Filters','A fresh start for your engine.'],[Zap,'Electrical Parts','Power for the road ahead.'],[Wrench,'Vehicle Accessories','The little extras that matter.']];
-export default function Products(){const [products,setProducts]=useState([]);const [state,setState]=useState(apiEnabled?'loading':'empty');useEffect(()=>{if(!apiEnabled)return;const controller=new AbortController();fetch(`${apiBase}/api/products`,{signal:controller.signal}).then(r=>{if(!r.ok)throw new Error();return r.json()}).then(d=>{if(!Array.isArray(d.products))throw new Error();setProducts(d.products);setState(d.products.length?'ready':'empty')}).catch(e=>{if(e.name!=='AbortError')setState('error')});return()=>controller.abort()},[]);return <section id="products" className="section products-section"><div className="container"><div className="section-heading"><div><p className="eyebrow red">THE RIGHT PART MAKES ALL THE DIFFERENCE</p><h2>Our products.<br/><span className="muted-heading">Your next smooth ride.</span></h2></div><p className="body-copy">We are currently preparing our complete product catalogue. A wide range of vehicle spare parts and automotive products will be available here soon.</p></div>{state==='loading'&&<p role="status">Checking our catalogue…</p>}{state==='error'&&<p className="catalogue-notice" role="status">The catalogue is temporarily unavailable. Please contact us about the part you need.</p>}{products.length>0?<div className="category-grid">{products.map(p=><article className="category-card real-product" key={p._id}>{p.images?.[0]&&<img src={p.images[0]} alt={p.name} loading="lazy"/>}<span className="category-label">{p.category}</span><h3>{p.name}</h3><p>{p.brand}</p><p>{p.description}</p><p>{p.vehicleCompatibility?.join(', ')}</p><strong>{p.price!=null?new Intl.NumberFormat('en-LK',{style:'currency',currency:'LKR'}).format(p.price):'Contact us for a quote'}</strong><p>{p.availability}</p><a className="text-link" href="#contact">Ask about this part <ArrowUpRight size={17}/></a></article>)}</div>:<><div className="catalogue-banner"><PackageOpen size={21}/><strong>Full Product Catalogue Coming Soon</strong><span>Good things are getting lined up.</span></div><div className="category-grid">{categories.map(([Icon,title,desc],i)=><article className="category-card" key={title}><div className="category-top"><Icon size={35} strokeWidth={1.4}/><span>0{i+1}</span></div><h3>{title}</h3><p>{desc}</p><span className="category-label">CATEGORY PREVIEW</span></article>)}</div></>}<div className="catalogue-bottom"><p><strong>Don't guess the part — ask us.</strong><br/>Looking for something specific? Let's find it.</p><a className="button dark" href="#contact">Ask About a Part <ArrowUpRight size={19}/></a></div></div></section>}
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, ChevronDown, ChevronUp, X } from 'lucide-react';
+import DailyBoard from '../components/DailyBoard';
+import ProductGrid from '../components/ProductGrid';
+import { apiEnabled } from '../data/business';
+import demoProducts from '../data/demoProducts';
+import { fetchPublicProducts } from '../utils/publicApi';
+
+const INITIAL_VISIBLE_PRODUCT_COUNT = 9;
+
+export default function Products({ activeFilter, searchTerm, onResetFilter }) {
+  const [expanded, setExpanded] = useState(false);
+  const [products, setProducts] = useState(demoProducts);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    if (!apiEnabled) return undefined;
+    let active = true;
+    fetchPublicProducts()
+      .then(items => { if (active) setProducts(items); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const categoryProducts = activeFilter.categoryId === 'all'
+    ? products
+    : products.filter(product => activeFilter.subcategoryId
+      ? product.subcategoryIds.includes(`${activeFilter.categoryId}:${activeFilter.subcategoryId}`)
+      : product.categoryIds.includes(activeFilter.categoryId));
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredProducts = normalizedSearch
+    ? categoryProducts.filter(product => [product.name, product.category, product.brand]
+      .some(value => String(value || '').toLowerCase().includes(normalizedSearch)))
+    : categoryProducts;
+  const visibleProducts = expanded
+    ? filteredProducts
+    : filteredProducts.slice(0, INITIAL_VISIBLE_PRODUCT_COUNT);
+  const featuredProducts = visibleProducts.slice(0, 4);
+  const remainingProducts = visibleProducts.slice(4);
+
+  useEffect(() => setExpanded(false), [activeFilter.categoryId, activeFilter.subcategoryId, normalizedSearch]);
+
+  const toggleProducts = () => {
+    if (expanded) {
+      setExpanded(false);
+      window.requestAnimationFrame(() => {
+        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return;
+    }
+    setExpanded(true);
+  };
+
+  return (
+    <section id="products" className="section products-section" ref={sectionRef}>
+      <div className="container product-showcase">
+        <header className="product-section-heading product-section-heading--marketplace">
+          <div>
+            <p className="eyebrow red"><span />OUR PRODUCTS</p>
+            <h2>Featured Products</h2>
+          </div>
+          <button
+            className="view-all-products"
+            type="button"
+            onClick={() => setExpanded(true)}
+            disabled={expanded || filteredProducts.length <= INITIAL_VISIBLE_PRODUCT_COUNT}
+          >
+            View All Products <ArrowRight size={17} />
+          </button>
+        </header>
+
+        {activeFilter.categoryId !== 'all' && (
+          <div className="active-product-filter" role="status">
+            <span>Showing: <strong>{activeFilter.label}</strong></span>
+            <button type="button" onClick={onResetFilter}>
+              Clear filter <X size={14} aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
+        {visibleProducts.length ? (
+          <>
+            <div className="board-product-layout">
+              <DailyBoard />
+              <ProductGrid
+                products={featuredProducts}
+                expanded={expanded}
+                className="featured-product-grid"
+              />
+            </div>
+            {remainingProducts.length > 0 && (
+              <ProductGrid
+                products={remainingProducts}
+                expanded={expanded}
+                className="product-grid--continuation"
+                startIndex={4}
+              />
+            )}
+          </>
+        ) : (
+          <ProductGrid
+            products={visibleProducts}
+            expanded={expanded}
+            emptyTitle={normalizedSearch ? 'No products found.' : 'No products found in this category.'}
+          />
+        )}
+
+        {filteredProducts.length > 0 && (
+          <div className="product-toggle-wrap">
+            {filteredProducts.length > INITIAL_VISIBLE_PRODUCT_COUNT && (
+              <button className="product-toggle" type="button" onClick={toggleProducts} aria-expanded={expanded}>
+                {expanded ? 'Show Less' : 'See More Products'}
+                {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+            )}
+            <span>{visibleProducts.length} of {filteredProducts.length} products</span>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

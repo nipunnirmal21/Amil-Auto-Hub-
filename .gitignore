@@ -1,7 +1,12 @@
 node_modules/
 dist/
 .env
+.env.*
+!.env.example
+!**/.env.example
 server/.env
 client/.env
+server/uploads/
 .sites-runtime/
 *.zip
+/logo.png

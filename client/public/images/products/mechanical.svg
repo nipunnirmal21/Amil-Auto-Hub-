@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 260" role="img" aria-labelledby="title">
+  <title id="title">Automotive mechanical part illustration</title>
+  <rect width="360" height="260" rx="24" fill="#f6f6f2"/>
+  <ellipse cx="180" cy="220" rx="103" ry="12" fill="#deded7"/>
+  <path d="M180 54l15 8 20-4 11 17 20 6 1 21 14 15-9 19 5 20-18 12-3 21-21 4-14 15-19-9-20 8-14-16-21-5-1-21-15-14 9-20-5-20 18-11 3-21 21-3z" fill="#ffd600" stroke="#242527" stroke-width="6"/>
+  <circle cx="180" cy="132" r="49" fill="#d1d2d3" stroke="#242527" stroke-width="6"/>
+  <circle cx="180" cy="132" r="22" fill="#f6f6f2" stroke="#242527" stroke-width="6"/>
+  <circle cx="180" cy="132" r="7" fill="#e6342b"/>
+</svg>
