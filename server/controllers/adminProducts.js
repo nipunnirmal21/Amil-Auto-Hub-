@@ -19,7 +19,7 @@ function booleanValue(value, fallback = false) {
   return value === true || value === 'true' || value === '1';
 }
 
-async function validateCategorySelection(categoryId, subcategoryId) {
+export async function validateCategorySelection(categoryId, subcategoryId) {
   if (!mongoose.isObjectIdOrHexString(categoryId)) {
     const error = new Error('Select a valid main category.');
     error.status = 400;

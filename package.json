@@ -9,6 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "server": "node --env-file-if-exists=server/.env server/index.js",
     "create-admin": "node --env-file-if-exists=server/.env server/scripts/createAdmin.js",
+    "seed-categories": "node --env-file-if-exists=server/.env server/scripts/seedCategories.js",
     "test": "node --test server/tests/*.test.js"
   },
   "dependencies": {
