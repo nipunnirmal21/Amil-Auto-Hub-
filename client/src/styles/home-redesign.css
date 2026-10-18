@@ -410,6 +410,7 @@ body { background: #fff; }
 }
 
 .daily-board { min-width: 0; filter: drop-shadow(0 10px 9px #0003); }
+.daily-board__media { position: relative; }
 
 .daily-board__viewport {
   position: relative;
@@ -422,7 +423,7 @@ body { background: #fff; }
 .daily-board__viewport img:not(.daily-board__image--reference-crop) {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .daily-board__image--reference-crop {
@@ -432,6 +433,47 @@ body { background: #fff; }
   width: 552.5%;
   max-width: none;
 }
+
+.daily-board__navigation { position: absolute; z-index: 2; inset: 0; pointer-events: none; }
+.daily-board__nav {
+  position: absolute;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #15191ce8;
+  color: #fff;
+  box-shadow: 0 3px 10px #0005;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translateY(-50%);
+}
+.daily-board__nav--previous { left: 9px; }
+.daily-board__nav--next { right: 9px; }
+.daily-board__nav:focus-visible { outline: 3px solid #ffc400; outline-offset: 2px; }
+.daily-board__nav:disabled { opacity: .38; cursor: not-allowed; }
+.daily-board__nav svg { width: 22px; height: 22px; }
+.daily-board__details { padding: 11px 12px 12px; background: #fff; color: #202428; }
+.daily-board__details > div { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.daily-board__details strong { font-size: 12px; }
+.daily-board__details time { color: #687385; font-size: 10px; font-weight: 700; }
+.daily-board__details p { margin: 5px 0 0; color: #3c434a; font-size: 11px; line-height: 1.4; }
+.daily-board__details span { display: block; margin-top: 5px; color: #687385; font-size: 9px; line-height: 1.4; }
+.daily-board__error button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9c1900;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.daily-board__error button:focus-visible { outline: 2px solid #ffc400; outline-offset: 2px; }
 
 .featured-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 

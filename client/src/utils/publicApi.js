@@ -36,9 +36,15 @@ export function normalizeApiProduct(product) {
 }
 
 async function readJson(path) {
-  const response = await fetch(apiUrl(path), { signal: AbortSignal.timeout(12000) });
+  const endpoint = apiUrl(path);
+  const response = await fetch(endpoint, { signal: AbortSignal.timeout(12000) });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || 'Unable to load storefront data.');
+  if (!response.ok) {
+    const error = new Error(data.message || 'Unable to load storefront data.');
+    error.status = response.status;
+    error.endpoint = endpoint;
+    throw error;
+  }
   return data;
 }
 
@@ -60,4 +66,13 @@ export async function fetchPublicCategories() {
 export async function fetchCurrentBillboard() {
   const data = await readJson('/billboard/current');
   return data.billboard ? { ...data.billboard, image: resolvePublicMedia(data.billboard.image) } : null;
+}
+
+export async function fetchPublishedBillboards() {
+  const data = await readJson('/billboards/history');
+  if (!Array.isArray(data.billboards)) throw new Error('The billboard history response was not in the expected format.');
+  return data.billboards.map(billboard => ({
+    ...billboard,
+    image: resolvePublicMedia(billboard.image),
+  }));
 }

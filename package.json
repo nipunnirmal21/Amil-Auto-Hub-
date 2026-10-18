@@ -10,7 +10,8 @@
     "server": "node --env-file-if-exists=server/.env server/index.js",
     "create-admin": "node --env-file-if-exists=server/.env server/scripts/createAdmin.js",
     "seed-categories": "node --env-file-if-exists=server/.env server/scripts/seedCategories.js",
-    "test": "node --test server/tests/*.test.js"
+    "migrate-billboards": "node --env-file-if-exists=server/.env server/scripts/migrateBillboardPublications.js",
+    "test": "node --test server/tests/*.test.js client/src/utils/*.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
