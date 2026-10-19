@@ -9,6 +9,6 @@ export function billboardNavigation(index, count) {
   };
 }
 
-export function billboardLabel(board) {
-  return board?.fallback || board?.active ? "Today's Board" : 'Previous Board';
+export function billboardLabel(board, index) {
+  return board?.fallback || index === 0 ? "Today's Board" : 'Previous Board';
 }

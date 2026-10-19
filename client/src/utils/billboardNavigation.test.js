@@ -29,7 +29,22 @@ test('single-board navigation is hidden and bounded', () => {
   });
 });
 
-test('only the current board uses the Today label', () => {
-  assert.equal(billboardLabel({ active: true }), "Today's Board");
-  assert.equal(billboardLabel({ active: false }), 'Previous Board');
+test('only the newest uploaded board uses the Today label', () => {
+  assert.equal(billboardLabel({ active: false }, 0), "Today's Board");
+  assert.equal(billboardLabel({ active: true }, 1), 'Previous Board');
+});
+
+test('three uploads navigate C to B to A and back without wrapping', () => {
+  const captions = ['C', 'B', 'A'];
+  let index = 0;
+  index = billboardNavigation(index, captions.length).olderIndex;
+  assert.equal(captions[index], 'B');
+  index = billboardNavigation(index, captions.length).olderIndex;
+  assert.equal(captions[index], 'A');
+  assert.equal(billboardNavigation(index, captions.length).atOldest, true);
+  index = billboardNavigation(index, captions.length).newerIndex;
+  assert.equal(captions[index], 'B');
+  index = billboardNavigation(index, captions.length).newerIndex;
+  assert.equal(captions[index], 'C');
+  assert.equal(billboardNavigation(index, captions.length).atNewest, true);
 });

@@ -68,7 +68,7 @@ export async function fetchCurrentBillboard() {
   return data.billboard ? { ...data.billboard, image: resolvePublicMedia(data.billboard.image) } : null;
 }
 
-export async function fetchPublishedBillboards() {
+export async function fetchBillboardHistory() {
   const data = await readJson('/billboards/history');
   if (!Array.isArray(data.billboards)) throw new Error('The billboard history response was not in the expected format.');
   return data.billboards.map(billboard => ({

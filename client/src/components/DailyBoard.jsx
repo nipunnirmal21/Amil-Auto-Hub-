@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import dailyBoard from '../data/dailyBoard';
-import { fetchPublishedBillboards } from '../utils/publicApi';
+import { fetchBillboardHistory } from '../utils/publicApi';
 import { billboardLabel, billboardNavigation } from '../utils/billboardNavigation';
 
 const COLOMBO_DATE = new Intl.DateTimeFormat('en-LK', {
@@ -23,7 +23,7 @@ export default function DailyBoard() {
   useEffect(() => {
     let active = true;
     setStatus({ loading: true, error: '', empty: false });
-    fetchPublishedBillboards()
+    fetchBillboardHistory()
       .then(items => {
         if (!active) return;
         if (!items.length) {
@@ -31,14 +31,13 @@ export default function DailyBoard() {
           return;
         }
         setBoards(items);
-        const currentIndex = items.findIndex(item => item.active);
-        setIndex(currentIndex >= 0 ? currentIndex : 0);
+        setIndex(0);
         setStatus({ loading: false, error: '', empty: false });
       })
       .catch(error => {
         if (!active) return;
         if (import.meta.env.DEV) {
-          console.error('[DailyBoard] Published board history request failed.', {
+          console.error('[DailyBoard] Board history request failed.', {
             endpoint: error.endpoint || '/api/billboards/history',
             status: error.status || 'network-error',
             message: error.message,
@@ -51,7 +50,7 @@ export default function DailyBoard() {
 
   const board = boards[index] || fallbackBoard;
   const usingFallbackImage = board.fallback || imageFailed;
-  const label = billboardLabel(board);
+  const label = billboardLabel(board, index);
   const date = board.date ? COLOMBO_DATE.format(new Date(board.date)) : '';
   const navigation = billboardNavigation(index, boards.length);
   const showNavigation = navigation.showNavigation && !board.fallback;
@@ -65,7 +64,7 @@ export default function DailyBoard() {
     setImageFailed(false);
     setRetryVersion(value => value + 1);
   };
-  const onlyPublishedBoard = !status.loading && !status.error && !status.empty && boards.length === 1 && !board.fallback;
+  const onlyBoard = !status.loading && !status.error && !status.empty && boards.length === 1 && !board.fallback;
 
   return (
     <aside className="daily-board" aria-label={`${label}${date ? `, ${date}` : ''}`}>
@@ -87,9 +86,9 @@ export default function DailyBoard() {
       <div className="daily-board__details" aria-live="polite">
         <div><strong>{label}</strong>{date && <time dateTime={String(board.date).slice(0, 10)}>{date}</time>}</div>
         {board.caption && <p>{board.caption}</p>}
-        {status.loading && <span>Loading published boards…</span>}
-        {status.empty && <span>No published boards are available. Showing the saved board.</span>}
-        {onlyPublishedBoard && <span>No previous published boards are available yet.</span>}
+        {status.loading && <span>Loading board history…</span>}
+        {status.empty && <span>No uploaded boards are available. Showing the saved board.</span>}
+        {onlyBoard && <span>No previous boards yet.</span>}
         {status.error && <span className="daily-board__error">Board history could not be loaded. Showing the saved board. <button type="button" onClick={retry}>Retry</button></span>}
         {imageFailed && <span>This board image could not be loaded. Showing the saved board.</span>}
       </div>
